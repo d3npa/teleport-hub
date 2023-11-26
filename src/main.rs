@@ -5,7 +5,8 @@ use thiserror::Error;
 
 use axum::{
     extract::{ConnectInfo, Path, State},
-    response::{Html, IntoResponse},
+    http::StatusCode,
+    response::{Html, IntoResponse, Redirect},
     routing::get,
     Router,
 };
@@ -46,7 +47,7 @@ async fn main() {
         .route("/teleport/:destination", get(teleport))
         .with_state(config);
 
-    axum::Server::bind(&"127.0.0.1:3000".parse().unwrap())
+    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service_with_connect_info::<SocketAddr>())
         .await
         .unwrap();
@@ -83,10 +84,12 @@ async fn teleport(
     State(config): State<Config>,
     Path(destination): Path<String>,
     ConnectInfo(client_ip): ConnectInfo<SocketAddr>,
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse, StatusCode> {
     let client_ip = client_ip.ip();
     match set_host_exit(&config, &destination, &client_ip.to_string()) {
-        Ok(_) => "ok".to_owned(),
-        Err(e) => format!("{e}"),
+        Ok(_) => Ok(Redirect::permanent("/")),
+        Err(e) => match e {
+            Error::NotFound => Err(StatusCode::NOT_FOUND),
+        },
     }
 }
