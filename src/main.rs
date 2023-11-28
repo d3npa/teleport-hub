@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{fs, net::SocketAddr};
 use teleport_hub::Exit;
 use thiserror::Error;
@@ -11,7 +11,7 @@ use axum::{
     Router,
 };
 
-#[derive(Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 struct Config {
     exits: Vec<Exit>,
 }
@@ -53,30 +53,24 @@ async fn main() {
         .unwrap();
 }
 
+#[derive(Serialize)]
+struct ExitsTemplateContext {
+    exits: Vec<String>,
+}
+
 async fn index(State(config): State<Config>) -> Html<String> {
-    let mut html = String::new();
-    html.push_str(
-        r"
-<!doctype html>
-<head>
-</head>
-<body>
-    <ul>
-"
-        .trim(),
-    );
-    for exit in &config.exits {
-        html.push_str(&format!(
-            "\n        <li><a href=\"/teleport/{}\">Teleport to {}</a></li>",
-            exit.pf_id, exit.display_name
-        ));
-    }
-    html.push_str(
-        "
-    </ul>
-</body>
-",
-    );
+    // let mut exits: Vec<String> = vec![];
+    // for exit in &config.exits {
+    //     exits.push(format!(
+    //         "<li><a href=\"/teleport/{}\">{}</a></li>",
+    //         exit.pf_id, exit.display_name
+    //     ));
+    // }
+    let tpl = mustache::compile_str(include_str!("../templates/hub.html"))
+        .expect("compiling html template in index()");
+    let html = tpl
+        .render_to_string(&config)
+        .expect("rendering html template in index()");
     html.into()
 }
 
