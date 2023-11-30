@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Teleport Hub</title>
+    <style>
+      html {
+        height: 100vh;
+        /*background-image: url();*/
+      }
+    </style>
+  </head>
+  <body>
+    <hr>
+    <p>Teleport to:</p>
+    <ul>
+    {{#exits}}
+      <li><a href="/teleport/{{{pf_id}}}">{{{display_name}}}</a></li>
+    {{/exits}}
+    </ul>
+  </body>
+</html>
