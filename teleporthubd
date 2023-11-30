@@ -1,0 +1,11 @@
+#!/bin/ksh
+
+# note: this file goes to /etc/rc.d/teleporthubd
+
+daemon="/usr/bin/teleport-hub"
+daemon_execdir="/var/teleport-hub/"
+
+. /etc/rc.d/rc.subr
+
+rc_bg='YES'
+rc_cmd $1
