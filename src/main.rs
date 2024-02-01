@@ -13,6 +13,7 @@ use axum::{
 
 #[derive(Serialize, Deserialize, Clone)]
 struct Config {
+    listen: String,
     exits: Vec<Exit>,
 }
 
@@ -37,17 +38,19 @@ fn set_host_exit(config: &Config, exit_id: &str, host_ip: &str) -> Result<(), Er
 
 #[tokio::main]
 async fn main() {
-    let config = {
+    let config: Config = {
         let contents = fs::read_to_string("config.toml").unwrap();
         toml::from_str(&contents).expect("could not parse config toml")
     };
+
+    let listen: SocketAddr = config.listen.parse().unwrap();
 
     let app = Router::new()
         .route("/", get(index))
         .route("/teleport/:destination", get(teleport))
         .with_state(config);
 
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+    axum::Server::bind(&listen)
         .serve(app.into_make_service_with_connect_info::<SocketAddr>())
         .await
         .unwrap();
