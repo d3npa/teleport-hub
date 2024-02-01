@@ -1,0 +1,6 @@
+listen = "0.0.0.0:8000"
+exits = [
+	{ pf_id = 'exit1', display_name = 'SomeVPN (Tōkyō)' },
+	{ pf_id = 'exit2', display_name = 'SomeVPN (Sapporo)' },
+	{ pf_id = 'exit3', display_name = 'SomeOtherVPN (Reykjavík)' },
+]
